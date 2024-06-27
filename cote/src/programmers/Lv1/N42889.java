@@ -36,7 +36,7 @@ public class N42889 {
         	arr[i] = arr[i]/clear;
         }
         
-        
+        // ½ÇÆÐÇÔ
         
         
         
