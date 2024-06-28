@@ -6,6 +6,7 @@ public class N133499 {
 		System.out.println(solution(new String[]{"aya", "yee", "u", "maa"}));
 	}
 	
+	// ¿Ë¾ËÀÌ(2)
 	 public static int solution(String[] babbling) {
         int answer = 0;
         
