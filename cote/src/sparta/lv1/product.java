@@ -1,4 +1,4 @@
-package sparta;
+package sparta.lv1;
 /*
     param   num1, num2
     return  num1 * num2
