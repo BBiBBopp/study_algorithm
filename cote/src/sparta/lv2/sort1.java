@@ -41,7 +41,7 @@ public class sort1 {
                 // 알파벳 자체를 기준으로 내림차순
                 return Character.toLowerCase(b) - Character.toLowerCase(a);
             }
-        })
+        });
 
         return null;
     }
