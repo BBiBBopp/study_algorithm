@@ -1,9 +1,5 @@
 package sparta.lv3;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-
 /*
 [최소 직사각형]
 가로, 세로 길이로 이루어진 배열 (명함)
@@ -15,7 +11,7 @@ Sol)
     long = max(w,h), short = min(w,h)
 
  */
-public class squareMin {
+public class MathMinMaxBasic {
     public static int solution(int[][] sizes) {
         int answer = 0;
         int maxw = 0;
