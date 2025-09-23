@@ -11,6 +11,48 @@ import java.util.Comparator;
 strings	                n	 return
 ["sun", "bed", "car"]	1  : ["car", "bed", "sun"]
 ["abce", "abcd", "cdx"]	2  : ["abcd", "abce", "cdx"]
+
+[Arrays.sort(...)]
+- 배열 정렬, int[], double[], char[] 같은 원시 타입 배열과 T[](참조 타입 배열) 모두 지원
+- 참조 타입(T[]) : TimeSort(병렬 + 삽입 혼합) 사용, 안정성 보장
+                  보통 O(n log n), 최선에선 O(n), 추가 메모리 사용
+- 원시 타입 배열 : Dual-Pivot QuickSort 사용, 안정성 보장 X
+                 평균 O(n log n), 최악 이론상 O(n^2)이지만 최적화됨, 추가 메모리 거의 없음
+                 안정 정렬이 필요한 경우 > Comparator 사용
+- 오버로드 (대표)
+Arrays.sort(int[] a);                       // 원시 타입
+Arrays.sort(int[] a, int from, int to);     // 부분 정렬
+Arrays.sort(T[] a);                         // 자연 순서(Comparable)
+Arrays.sort(T[] a, Comparator<? super T> c);// 커스텀 기준
+
+- Comparator : 원시 타입 사용 불가하니 레퍼타입으로 감싸서 사용해야 함
+                comparator가 음수를 반환하면 비교된 두 수를 바꾸지 않음
+- 자주 쓰는 Comparator 패턴
+// 숫자 오름/내림
+Arrays.sort(boxed, Integer::compare);      // 오름
+Arrays.sort(boxed, (x,y) -> Integer.compare(y, x)); // 내림 (또는 Comparator.reverseOrder())
+// 주의 : a-b로 비교하지 않기, 오버플로 위험, 항상 Integer.compare(a,b)같은 비교함수 사용
+   compare(a,b) > a가 b보다 작으면 -1, 같으면 0, 크면 1
+
+// 다중 키 (1) 길이 → (2) 사전순
+Arrays.sort(arr, Comparator.comparingInt(String::length)
+                           .thenComparing(Comparator.naturalOrder()));
+
+// n번째 문자 → 같으면 전체 사전순
+Arrays.sort(arr, (a,b) -> {
+    int cmp = Character.compare(a.charAt(n), b.charAt(n));
+    return (cmp != 0) ? cmp : a.compareTo(b);
+});
+
+// 대소문자 무시
+Arrays.sort(arr, String.CASE_INSENSITIVE_ORDER);
+
+// 로케일 민감(한글/독일어 등)
+Collator col = Collator.getInstance(Locale.KOREA);
+Arrays.sort(arr, col);
+
+[Collections.sort(...)]
+- 리스트 정렬, ArrayList, LinkedList 같은 컬렉션 정렬
  */
 public class StringSort {
     public String[] solution(String[] strings, int n) {
@@ -20,6 +62,7 @@ public class StringSort {
         Arrays.sort(strings);
 
         // 2) n번째 문자 기준 정렬
+        // charAt(n)이 char이지만 정수로 승격되어 int 비교
         Arrays.sort(strings, Comparator.comparingInt(s -> s.charAt(n)));
 
         return strings;
@@ -47,6 +90,16 @@ public class StringSort {
 | 병합 정렬 | O(n log n) | O(n log n) | ✅ 안정 | 추가 메모리 필요    |
 | 퀵 정렬   | O(n log n) | O(n²)      | ❌ 불안 | 평균적으로 가장 빠름  |
 | 힙 정렬   | O(n log n) | O(n log n) | ❌ 불안 | 메모리 효율적      |
+
+4. 병합 정렬(Merge Sort)
+- 분할 정복(Divide & Conquer). 배열을 반씩 나눠서 정렬 후 합침, 안정성 보장
+- 추가 메모리 필요
+- 시간 복잡도 : O(n log n)
+
+5. 퀵 정렬(Quick sort)
+- 분할 정복. 하나의 피벗(pivot)을 기준으로 작은 값을 왼쪽, 큰 값을 오른쪽으로 분할, 안정성 보장 X
+- 실제로는 가장 빠른 정렬 중 하나라 많이 사용됨
+- 시간 복잡도 : 평균 O(n log n), 최악 O(n^2)
 
 6. 힙 정렬(Heap sort)
 - 힙 자료구조 사용. 최대 힙을 만들어서 루트(최대값)을 꺼내 정렬, 안정성 보장 X
@@ -131,92 +184,4 @@ public class StringSort {
             if(!swapped) break;
         }
     }
-
-    /**
-     * 4. 병합 정렬(Merge Sort)
-     * - 분할 정복(Divide & Conquer). 배열을 반씩 나눠서 정렬 후 합침, 안정성 보장
-     * - 추가 메모리 필요
-     * - 시간 복잡도 : O(n log n)
-     *
-     * 사용 방법 : mergeSort(arr, 0, arr.length - 1)
-     */
-    void mergeSort(int[] arr, int left, int right){
-        if(left < right){
-            int mid = (left+right)/2;
-
-            mergeSort(arr, left, mid); // 왼쪽 분할
-            mergeSort(arr, mid+1, right); // 오른쪽 분할
-
-            merge(arr, left, mid, right);
-        }
-    }
-
-    void merge(int[] arr, int left, int mid, int right){
-        int n1 = mid - left + 1;
-        int n2 = right - mid;
-
-        int[] L = new int[n1];
-        int[] R = new int[n2];
-
-        for(int i = 0; i < n1; i++){
-            L[i] = arr[left+i];
-        }
-        for(int j = 0; j < n2; j++){
-            R[j] = arr[mid+j+1];
-        }
-
-        int i = 0, j = 0, k = left;
-
-        while(i < n1 && j < n2){
-            if(L[i] <= R[j]) arr[k++] = L[i++];
-            else arr[k++] = R[j++];
-        }
-
-        while(i < n1){
-            arr[k++] = L[i++];
-        }
-        while(j < n2){
-            arr[k++] = R[j++];
-        }
-    }
-
-    /**
-     * 5. 퀵 정렬(Quick sort)
-     * - 분할 정복. 하나의 피벗(pivot)을 기준으로 작은 값을 왼쪽, 큰 값을 오른쪽으로 분할, 안정성 보장 X
-     * - 실제로는 가장 빠른 정렬 중 하나라 많이 사용됨
-     * - 시간 복잡도 : 평균 O(n log n), 최악 O(n^2)
-     *
-     * 사용 방법 : quickSort(arr, 0, arr.length - 1);
-     */
-    void quickSort(int[] arr, int low, int high){
-        if(low < high){
-            int pi = partition(arr, low, high);
-            
-            quickSort(arr, low, pi-1); // 왼쪽 파티션
-            quickSort(arr, pi+1, high); // 오른쪽 파티션
-        }
-    }
-
-    int partition(int[] arr, int low, int high){
-        int pivot = arr[high]; // 마지막 원소를 피벗으로 선택
-        int i = low - 1;
-
-        for(int j=low; j<high; j++){
-            if(arr[j] <= pivot){
-                i++;
-
-                int temp = arr[i];
-                arr[i] = arr[j];
-                arr[j] = temp;
-            }
-        }
-
-        int temp = arr[i+1];
-        arr[i+1] = arr[high];
-        arr[high] = temp;
-
-        return i+1;
-    }
-
-
 }
